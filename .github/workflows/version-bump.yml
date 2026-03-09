@@ -35,8 +35,10 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
       - name: Commit and push version bump
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "alex-collab-bot"
+          git config user.email "equinoxfjdanh@gmail.com"
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
           git push origin main
       - name: Push tags
         run: |
