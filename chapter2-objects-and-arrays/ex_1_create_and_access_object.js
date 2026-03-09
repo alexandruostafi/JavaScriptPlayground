@@ -1,4 +1,4 @@
-var movie =
+const movie =
 {
     title: "Inception",
     year: 2010,
@@ -6,4 +6,4 @@ var movie =
     isWatched: true
 }
 
-console.log(`The movie ${movie.title}(${movie.year}) has a rating of ${movie.rating}. Watched: ${movie.isWatched}`)
+console.log(`The movie ${movie.title} (${movie.year}) has a rating of ${movie.rating}. Watched: ${movie.isWatched}`)

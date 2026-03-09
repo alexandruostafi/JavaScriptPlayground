@@ -19,12 +19,12 @@ let user3 =
     isAdmin: true
 }
 
-users = [user1, user2, user3]
+const users = [user1, user2, user3]
 
 let adminCount = 0;
 
-users.forEach(element => {
-    if (element.isAdmin) {
+users.forEach(user => {
+    if (user.isAdmin) {
         adminCount++;
     }
 });
@@ -32,3 +32,7 @@ users.forEach(element => {
 console.log(`Second user name is: ${users[1].name}`)
 console.log(`Third user's age is: ${users[2].age}`)
 console.log(`Number of admins is: ${adminCount}`)
+
+users.forEach(user => {
+    console.log(`Name: ${user.name}, Age: ${user.age}, Admin: ${user.isAdmin}`)
+})
