@@ -1,13 +1,15 @@
 name: Version Bump and Tag
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - main
 
 jobs:
   version-bump:
-    if: github.actor != 'alex-collab-bot'
+    if: github.actor != 'alex-collab-bot' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,7 +28,8 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Bump version
         run: |
-          npm version patch --no-git-tag-version
+          npm install -g standard-version
+          standard-version
           NEW_VERSION=$(jq -r .version package.json)
           echo "New version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
@@ -34,10 +37,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add package.json package-lock.json
-          git commit -m "chore: bump version to $NEW_VERSION"
           git push origin main
-      - name: Create tag
+      - name: Push tags
         run: |
-          git tag v$NEW_VERSION
-          git push origin v$NEW_VERSION
+          git push origin --tags
