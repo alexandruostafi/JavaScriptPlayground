@@ -17,28 +17,62 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 'lts/*'
+
       - name: Get current version
         run: |
           VERSION=$(jq -r .version package.json)
           echo "Current version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Determine bump type
+        id: bump_type
+        run: |
+          BUMP="patch"
+
+          # 1. Check PR labels for explicit bump type (highest priority)
+          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+          if echo "$LABELS" | grep -qi '"major"'; then
+            BUMP="major"
+          elif echo "$LABELS" | grep -qi '"minor"'; then
+            BUMP="minor"
+          elif echo "$LABELS" | grep -qi '"patch"'; then
+            BUMP="patch"
+          else
+            # 2. Fall back to Conventional Commits in the PR title
+            TITLE='${{ github.event.pull_request.title }}'
+            # Breaking change indicated by "!" suffix or "BREAKING CHANGE" keyword
+            if echo "$TITLE" | grep -qiP '^[a-z]+(\(.+\))?!:' || echo "$TITLE" | grep -qi 'BREAKING CHANGE'; then
+              BUMP="major"
+            # feat → minor bump
+            elif echo "$TITLE" | grep -qiP '^feat(\(.+\))?:'; then
+              BUMP="minor"
+            fi
+            # fix / chore / docs / refactor / etc. → keep patch (default)
+          fi
+
+          echo "Bump type: $BUMP"
+          echo "BUMP=$BUMP" >> $GITHUB_ENV
+
       - name: Bump version
         run: |
-          npm version patch --no-git-tag-version
+          npm version $BUMP --no-git-tag-version
           NEW_VERSION=$(jq -r .version package.json)
           echo "New version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
       - name: Commit and push version bump
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add package.json package-lock.json
-          git commit -m "chore: bump version to $NEW_VERSION [skip ci] "
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
           git push origin main
+
       - name: Create tag
         run: |
           git tag v$NEW_VERSION
