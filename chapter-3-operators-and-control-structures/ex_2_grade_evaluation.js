@@ -6,6 +6,8 @@ if (score >= 90) {
     console.log(`${score} -> Good`)
 } else if (score >= 50) {
     console.log(`${score} -> Pass`)
-} else {
+} else if (score >= 0) {
     console.log(`${score} -> Fail`)
+} else {
+    console.log('Invalid score')
 }
